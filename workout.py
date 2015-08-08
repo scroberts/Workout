@@ -45,22 +45,36 @@ def RepFitRate(wstr, fitness):
         except Exception:
             pass
     return(wstr)
+    
+def printTime(t):
+    if t > 100:
+        tstr = str(timedelta(seconds=t))
+        tstr = tstr.lstrip('0:')
+        if '.' in tstr:
+            tstr = tstr.rstrip('0') 
+        print(tstr,end="")
+    else:
+        print('{0:0.1f} [sec] '.format(t),end='')
+            
+def printTimeDist(t,d):
+    print('Time = ', end = '')
+    printTime(t)
+    print(', Dist = {0:0.1f} km'.format(d/units['km']),end='')  
 
 def printNumUnit(mag, unit):
     mag = mag / units[unit['num']]
     try:
         mag = mag * units[unit['den']]
     except:
-        pass        
-#     if mag > 100 and (unit['num'] == 'sec' or unit['num'] == 'time'):
-    if mag > 100 and unit['num'] == 'time':
-        mag = str(timedelta(seconds=mag))
-        if '.' in mag:
-            mag = mag.rstrip('0')       
-    try:
-        print(mag, '[', unit['num'], '/', unit['den'], ']', end="")
-    except:
-        print(mag, '[', unit['num'], ']',end="")    
+        pass         
+    if unit['num'] == 'time':
+        printTime(mag)
+        if 'den' in unit:
+            print(' [/', unit['den'], ']', sep = '', end='')
+    elif 'den' in unit:
+        print(mag, ' [', unit['num'], '/', unit['den'], ']', sep = '', end='')
+    else:
+        print(mag, ' [', unit['num'], ']',sep = '', end='')    
             
 def parseNumUnit(nus):
     udic = {}
@@ -117,21 +131,6 @@ def getTimeDist(v,r):
         dist = 0  
     return([time, dist])   
 
-def printTime(t):
-    if t > 100:
-        tstr = str(timedelta(seconds=t))
-        tstr = tstr.lstrip('0:')
-        if '.' in tstr:
-            tstr = tstr.rstrip('0') 
-        print(tstr,end="")
-    else:
-        print('{0:0.1} [sec] '.format(t),end='')
-            
-def printTimeDist(t,d):
-    print('Time = ', end = '')
-    printTime(t)
-    print(', Dist = {0:0.1f} km'.format(d/units['km']),end='')  
-
 def parseWS(WS, wstr, fitness):
     res = wstr.split('rep')
     WS.reps = 1
@@ -171,21 +170,22 @@ class Workout:
         print('\nWorkout: wstr, fitstr = ',wstr, fitstr)
         self.fitness = get_fitness(fitstr)
 #         print('Workout __init__:fitness.fitness = ',self.fitness)
-#         print('Workout __init__: Fitness = ', self.pace_for_fitness('E'))
         self.ws = WS(wstr, self.fitness)
         
     def displayWorkout(self):
 #         print('displayWorkout: listing of Vol / Rate pairs')
         print('reps = ', self.ws.reps)
         for v,r,t,d in self.ws.wsteps:
+            print('{',end='')
             v.displayVol()
-            print(' ',end='')
+            print(' @ ',end='')
             r.displayRate()
-            print(' ',end='')
+            print('} ',end='')
             printTimeDist(t,d)
             print('')
         print('Total ',end = '')
-        printTimeDist(self.ws.time, self.ws.dist)
+        printTimeDist(self.ws.reps * self.ws.time, self.ws.reps * self.ws.dist)
+        print('')
         
 #             try:
 #                 if v.Unit['num'] in distUnit and (r.Unit['num'] in timeUnit and r.Unit['den'] in distUnit):
@@ -220,7 +220,7 @@ class Vol:
 #         print('Vol __init__: Amt, Unit ', self.Amt, self.Unit)  
         
     def displayVol(self):
-        print("Vol = ", end="")
+#         print("Vol = ", end="")
         printNumUnit(self.Amt, self.Unit)
     
     
@@ -241,7 +241,7 @@ class Rate:
 #         print('Rate __init__: Rate, Unit ', self.Rate, self.Unit)  
          
     def displayRate(self):
-        print("Rate = ", end = "")
+#         print("Rate = ", end = "")
         printNumUnit(self.Rate, self.Unit)
 
 w1str = '2 rep 1.2 km @ 4:32/km + 5 min @ 7:00/mile'
