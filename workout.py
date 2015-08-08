@@ -36,8 +36,6 @@ def num(s):
 def procWSstr(wstr, fitness):
     # First substitute times for fitness paces
     wstr = RepFitRate(wstr, fitness)
-    
-    
    
 def RepFitRate(wstr, fitness):
     for level,rate in fitness.items():
@@ -60,9 +58,9 @@ def printNumUnit(mag, unit):
         if '.' in mag:
             mag = mag.rstrip('0')       
     try:
-        print(mag, '[', unit['num'], '/', unit['den'], ']')
+        print(mag, '[', unit['num'], '/', unit['den'], ']', end="")
     except:
-        print(mag, '[', unit['num'], ']')    
+        print(mag, '[', unit['num'], ']',end="")    
             
 def parseNumUnit(nus):
     udic = {}
@@ -103,24 +101,58 @@ def parseNumUnit(nus):
             pass
     return([n,udic]) 
 
+def getTimeDist(v,r):
+    if 'den' in r.Unit and (v.Unit['num'] in distUnit and (r.Unit['num'] in timeUnit and r.Unit['den'] in distUnit)):
+        time = v.Amt * r.Rate
+        dist = v.Amt
+    elif v.Unit['num'] in distUnit and r.Unit['num'] in timeUnit:
+        time = r.Rate
+        dist = v.Amt   
+    elif v.Unit['num'] in timeUnit and (r.Unit['num'] in timeUnit and r.Unit['den'] in distUnit):
+        time = v.Amt
+        dist = v.Amt / r.Rate
+    else:
+        print('getTimeDist: Unable to calculate time / distance')
+        time = 0
+        dist = 0  
+    return([time, dist])   
+
+def printTime(t):
+    if t > 100:
+        tstr = str(timedelta(seconds=t))
+        tstr = tstr.lstrip('0:')
+        if '.' in tstr:
+            tstr = tstr.rstrip('0') 
+        print(tstr,end="")
+    else:
+        print('{0:0.1} [sec] '.format(t),end='')
+            
+def printTimeDist(t,d):
+    print('Time = ', end = '')
+    printTime(t)
+    print(', Dist = {0:0.1f} km'.format(d/units['km']),end='')  
+
 def parseWS(WS, wstr, fitness):
     res = wstr.split('rep')
     WS.reps = 1
     if len(res) > 1:
         WS.reps = num(res[0])
-    WS.wsteps = []  
+    WS.wsteps = []
+    WS.time = 0
+    WS.dist = 0  
     res = res[-1].split('+')
     for str in res:
-        print('parseWS:',str.strip())
+#         print('parseWS:',str.strip())
         ws_str = str.split('@')
 #         print('parseWS lr:',ws_str[0].strip(), ws_str[1].strip())
-        step = []
+#         step = []
         try:
-            step.append(Vol(ws_str[0].strip()))
-            step.append(Rate(ws_str[1].strip(), fitness))
-#             step[0].displayVol()
-#             step[1].displayRate()
-            WS.wsteps.append(step)
+            v = Vol(ws_str[0].strip())
+            r = Rate(ws_str[1].strip(), fitness)
+            [time, dist] = getTimeDist(v,r)
+            WS.time += time
+            WS.dist += dist
+            WS.wsteps.append([v, r, time, dist])
 #             print('parseWS: WS.wsteps:',WS.wsteps)
         except:
             exitstr = 'Error: unable to parse: [ ' + str.strip() + ']'
@@ -143,20 +175,27 @@ class Workout:
         self.ws = WS(wstr, self.fitness)
         
     def displayWorkout(self):
-        print('displayWorkout: listing of Vol / Rate pairs')
+#         print('displayWorkout: listing of Vol / Rate pairs')
         print('reps = ', self.ws.reps)
-        for v,r in self.ws.wsteps:
+        for v,r,t,d in self.ws.wsteps:
             v.displayVol()
+            print(' ',end='')
             r.displayRate()
-            try:
-                if v.Unit['num'] in distUnit and (r.Unit['num'] in timeUnit and r.Unit['den'] in distUnit):
-                    print('Time = {0:.1f} {1:}'.format(v.Amt * r.Rate / units[r.Unit['num']], r.Unit['num']))
-                    print('Dist = ', v.Amt / units['m'], '[ m ]')
-            except:
-                if v.Unit['num'] in distUnit and r.Unit['num'] in timeUnit:
-                    print('Time = {0:.1f} {1:}'.format(r.Rate / units[r.Unit['num']], r.Unit['num']))
-                    print('Dist = ', v.Amt / units['m'], '[ m ]')          
-        print('displayWorkout: End')
+            print(' ',end='')
+            printTimeDist(t,d)
+            print('')
+        print('Total ',end = '')
+        printTimeDist(self.ws.time, self.ws.dist)
+        
+#             try:
+#                 if v.Unit['num'] in distUnit and (r.Unit['num'] in timeUnit and r.Unit['den'] in distUnit):
+#                     print('Time = {0:.1f} {1:}'.format(v.Amt * r.Rate / units[r.Unit['num']], r.Unit['num']))
+#                     print('Dist = ', v.Amt / units['m'], '[ m ]')
+#             except:
+#                 if v.Unit['num'] in distUnit and r.Unit['num'] in timeUnit:
+#                     print('Time = {0:.1f} {1:}'.format(r.Rate / units[r.Unit['num']], r.Unit['num']))
+#                     print('Dist = ', v.Amt / units['m'], '[ m ]')          
+#         print('displayWorkout: End')
         
     def pace_for_fitness(self, id):
         return(self.fitness[id])
