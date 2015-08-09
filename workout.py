@@ -147,6 +147,8 @@ def parseWS(WS, wstr, fitness):
         except:
             exitstr = 'Error: unable to parse: [ ' + str.strip() + ']'
             sys.exit(exitstr)  
+    WS.time *= WS.reps
+    WS.dist *= WS.reps
             
 def get_fitness(level):
     fitness = {}
@@ -155,29 +157,44 @@ def get_fitness(level):
     return fitness[level]
         
 class Workout:
-    def  __init__(self, wstr, fitstr):
-        print('\nWorkout: wstr, fitstr = ',wstr, fitstr)
+    def  __init__(self, name, wslist, fitstr):
+        print('\nWorkout:')
+        print('\tName = ', name)
+        print('\twstr = ', wslist)
+        print('\tfitstr = ', fitstr)
+        self.name = name
         self.fitness = get_fitness(fitstr)
-        self.ws = WS(wstr, self.fitness)
-        
+        self.wsegs = []
+        self.time = 0
+        self.dist = 0
+        for wstr in wslist:
+            wseg = WSeg(wstr, self.fitness)
+            self.wsegs.append(wseg)
+            self.time += wseg.time
+            self.dist += wseg.dist
+                 
     def displayWorkout(self):
-        print('reps = ', self.ws.reps)
-        for v,r,t,d in self.ws.wsteps:
-            print('{',end='')
-            v.displayVol()
-            print(' @ ',end='')
-            r.displayRate()
-            print('} ',end='')
-            printTimeDist(t,d)
+        for wseg in self.wsegs:
+            print('\t\treps = ', wseg.reps)
+            for v,r,t,d in wseg.wsteps:
+                print('\t\t\t{',end='')
+                v.displayVol()
+                print(' @ ',end='')
+                r.displayRate()
+                print('} ',end='')
+                printTimeDist(t,d)
+                print('')
+            print('\t\tWSEG: ',end = '')
+            printTimeDist(wseg.time, wseg.dist)
             print('')
-        print('Total ',end = '')
-        printTimeDist(self.ws.reps * self.ws.time, self.ws.reps * self.ws.dist)
+        print('\tWorkout: ',end = '')
+        printTimeDist(self.time, self.dist)
         print('')
                
     def pace_for_fitness(self, id):
         return(self.fitness[id])
     
-class WS:
+class WSeg:
     def __init__(self, wstr, fitness):
         self.wstr = wstr
         res = wstr.split('rep')
@@ -210,16 +227,19 @@ class Rate:
     def displayRate(self):
         printNumUnit(self.Rate, self.Unit)
 
-w1str = '2 rep 1.2 km @ 4:32/km + 5 min @ 7:00/mile'
-w2str = '60 min @ E + 20 min @ T + 5 min @ E + 10 min @ T + 5 min @ E + 5 min @ T'
-w3str = '2 rep 1.2 km @ 4:32/km + 90 sec @ R + 500 m @ 120 sec + 200 m @ R'
-w4str = 'a rep 1.2 km @ 5:00/mile'
+w1str = ['2 rep 1.2 km @ 4:32/km + 5 min @ 7:00/mile']
+w2str = ['60 min @ E + 20 min @ T + 5 min @ E + 10 min @ T + 5 min @ E + 5 min @ T']
+w3str = ['2 rep 1.2 km @ 4:32/km + 90 sec @ R + 500 m @ 120 sec + 200 m @ R']
+w4str = ['10 min @ E', '2 rep 1.2 km @ T + 90 sec @ E', '10 min @ E']
 
-wo1 = Workout(w1str,'vdot50')
+wo1 = Workout('workout 1', w1str, 'vdot50')
 wo1.displayWorkout()
 
-wo2 = Workout(w2str,'vdot50')
+wo2 = Workout('workout 2', w2str, 'vdot50')
 wo2.displayWorkout()
 
-wo3 = Workout(w3str,'vdot50')
+wo3 = Workout('workout 3', w3str, 'vdot50')
+wo3.displayWorkout()
+
+wo3 = Workout('workout 4', w4str, 'vdot50')
 wo3.displayWorkout()
