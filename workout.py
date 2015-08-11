@@ -125,30 +125,6 @@ def getTimeDist(v,r):
         time = 0
         dist = 0  
     return([time, dist])   
-
-def parseWS(WS, wstr, fitness):
-    res = wstr.split('rep')
-    WS.reps = 1
-    if len(res) > 1:
-        WS.reps = num(res[0])
-    WS.wsteps = []
-    WS.time = 0
-    WS.dist = 0  
-    res = res[-1].split('+')
-    for str in res:
-        ws_str = str.split('@')
-        try:
-            v = Vol(ws_str[0].strip())
-            r = Rate(ws_str[1].strip(), fitness)
-            [time, dist] = getTimeDist(v,r)
-            WS.time += time
-            WS.dist += dist
-            WS.wsteps.append([v, r, time, dist])
-        except:
-            exitstr = 'Error: unable to parse: [ ' + str.strip() + ']'
-            sys.exit(exitstr)  
-    WS.time *= WS.reps
-    WS.dist *= WS.reps
             
 def get_fitness(level):
     fitness = {}
@@ -156,13 +132,45 @@ def get_fitness(level):
     fitness['vdot50'] = {'E' : '5:15/km', 'M' : '4:31/km', 'T' : '4:15/km', 'I' : '3:55/km', 'R' : '3:38/km'}
     return fitness[level]
         
+class TrainingPlan:
+    def __init__(self, planName):
+        print('\Workout Plan:', planName)
+        self.name = planName
+        self.list = []
+        
+    def addWorkout(self, Dict, WorkoutName):
+        try:
+            wo = Dict.list[WorkoutName]
+            self.list.append(wo)
+        except:
+            print("Couldn't find WorkoutName in Dict")
+            
+    def printTrainingPlan(self):
+        print('\nTraining Plan:', self.name)
+        for wo in self.list:
+            wo.displayWorkout()
+
+class WorkoutDict:
+    def __init__(self, DictName):
+        print('\nWorkout Dictionary:')
+        print('\nName = ', DictName)
+        self.name = DictName
+        self.list = {}
+        
+    def addWorkout(self, WorkoutName, wslist, fitstr):
+        wo = Workout(WorkoutName, wslist, fitstr)
+        self.list[WorkoutName] = wo
+        
+    def listdict(self):
+        for key,wo in self.list.items():
+            print(wo.name)
+        
+
 class Workout:
     def  __init__(self, name, wslist, fitstr):
-        print('\nWorkout:')
-        print('\tName = ', name)
-        print('\twstr = ', wslist)
-        print('\tfitstr = ', fitstr)
         self.name = name
+        self.wslist = wslist
+        self.fitstr = fitstr
         self.fitness = get_fitness(fitstr)
         self.wsegs = []
         self.time = 0
@@ -174,6 +182,10 @@ class Workout:
             self.dist += wseg.dist
                  
     def displayWorkout(self):
+        print('\nWorkout:')
+        print('\tName = ', self.name)
+        print('\twstr = ', self.wslist)
+        print('\tfitstr = ', self.fitstr)
         for wseg in self.wsegs:
             print('\t\treps = ', wseg.reps)
             for v,r,t,d in wseg.wsteps:
@@ -193,16 +205,41 @@ class Workout:
                
     def pace_for_fitness(self, id):
         return(self.fitness[id])
+
     
 class WSeg:
     def __init__(self, wstr, fitness):
         self.wstr = wstr
         res = wstr.split('rep')
         try:
-            parseWS(self, wstr, fitness)
+            self.parseWS(wstr, fitness)
         except:
             print('WS __init__: Error parsing input string')
             raise
+            
+    def parseWS(self, wstr, fitness):
+        res = wstr.split('rep')
+        self.reps = 1
+        if len(res) > 1:
+            self.reps = num(res[0])
+        self.wsteps = []
+        self.time = 0
+        self.dist = 0  
+        res = res[-1].split('+')
+        for str in res:
+            ws_str = str.split('@')
+            try:
+                v = Vol(ws_str[0].strip())
+                r = Rate(ws_str[1].strip(), fitness)
+                [time, dist] = getTimeDist(v,r)
+                self.time += time
+                self.dist += dist
+                self.wsteps.append([v, r, time, dist])
+            except:
+                exitstr = 'Error: unable to parse: [ ' + str.strip() + ']'
+                sys.exit(exitstr)  
+        self.time *= self.reps
+        self.dist *= self.reps
 
 class Vol:
     def __init__(self, VolStr):
@@ -211,8 +248,7 @@ class Vol:
         
     def displayVol(self):
         printNumUnit(self.Amt, self.Unit)
-    
-    
+       
 class Rate:
     def __init__(self, RateStr, fitness):
         self.RateStr = RateStr
@@ -232,14 +268,16 @@ w2str = ['60 min @ E + 20 min @ T + 5 min @ E + 10 min @ T + 5 min @ E + 5 min @
 w3str = ['2 rep 1.2 km @ 4:32/km + 90 sec @ R + 500 m @ 120 sec + 200 m @ R']
 w4str = ['10 min @ E', '2 rep 1.2 km @ T + 90 sec @ E', '10 min @ E']
 
-wo1 = Workout('workout 1', w1str, 'vdot50')
-wo1.displayWorkout()
+plan = TrainingPlan('halfMarathon')
+dict = WorkoutDict('woDict')
 
-wo2 = Workout('workout 2', w2str, 'vdot50')
-wo2.displayWorkout()
+dict.addWorkout('workout 1', w1str, 'vdot50')
+dict.addWorkout('workout 2', w2str, 'vdot50')
+dict.addWorkout('workout 3', w3str, 'vdot50')
+dict.addWorkout('workout 4', w4str, 'vdot50')
+dict.listdict()
 
-wo3 = Workout('workout 3', w3str, 'vdot50')
-wo3.displayWorkout()
+plan.addWorkout(dict,'workout 1')
+plan.addWorkout(dict,'workout 3')
 
-wo3 = Workout('workout 4', w4str, 'vdot50')
-wo3.displayWorkout()
+plan.printTrainingPlan()
