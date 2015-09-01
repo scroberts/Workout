@@ -129,7 +129,7 @@ def getTimeDist(v,r):
 def get_fitness(level):
     fitness = {}
     fitness['vdot50'] = {}
-    fitness['vdot50'] = {'E' : '5:15/km', 'M' : '4:31/km', 'T' : '4:15/km', 'I' : '3:55/km', 'R' : '3:38/km'}
+    fitness['vdot50'] = {'Rec' : '5:45/km', 'E' : '5:15/km', 'M' : '4:31/km', 'T' : '4:15/km', 'I' : '3:55/km', 'Rep' : '3:38/km'}
     return fitness[level]
         
 class TrainingPlan:
@@ -210,7 +210,7 @@ class Workout:
 class WSeg:
     def __init__(self, wstr, fitness):
         self.wstr = wstr
-        res = wstr.split('rep')
+        res = wstr.split('reps:')
         try:
             self.parseWS(wstr, fitness)
         except:
@@ -218,7 +218,7 @@ class WSeg:
             raise
             
     def parseWS(self, wstr, fitness):
-        res = wstr.split('rep')
+        res = wstr.split('reps:')
         self.reps = 1
         if len(res) > 1:
             self.reps = num(res[0])
@@ -263,21 +263,86 @@ class Rate:
     def displayRate(self):
         printNumUnit(self.Rate, self.Unit)
 
-w1str = ['2 rep 1.2 km @ 4:32/km + 5 min @ 7:00/mile']
+w1str = ['2 reps: 1.2 km @ 4:32/km + 5 min @ 7:00/mile']
 w2str = ['60 min @ E + 20 min @ T + 5 min @ E + 10 min @ T + 5 min @ E + 5 min @ T']
-w3str = ['2 rep 1.2 km @ 4:32/km + 90 sec @ R + 500 m @ 120 sec + 200 m @ R']
-w4str = ['10 min @ E', '2 rep 1.2 km @ T + 90 sec @ E', '10 min @ E']
+w3str = ['2 reps: 1.2 km @ 4:32/km + 90 sec @ Rep + 500 m @ 120 sec + 200 m @ Rep']
+w4str = ['10 min @ E', '2 reps: 1.2 km @ T + 90 sec @ E', '10 min @ E']
+
+""" Locations of workouts in book
+Short Interval Runs -               Page 150
+Recovery Runs -                     Page 137
+Cruise Interval Run -               Page 143
+"""
+
+CruiseIntervalRun1 = ['5 min @ Rec + 5 min @ E', '4 reps: 5 min @ T + 3 min @ Rec', '5 min @ E + 5 min @ Rec']
+CruiseIntervalRun2 = ['5 min @ Rec + 5 min @ E', '4 reps: 8 min @ T + 3 min @ Rec', '5 min @ E + 5 min @ Rec']
+CruiseIntervalRun3 = ['5 min @ Rec + 5 min @ E', '4 reps: 10 min @ T + 3 min @ Rec', '5 min @ E + 5 min @ Rec']
+CruiseIntervalRun4 = ['5 min @ Rec + 5 min @ E', '4 reps: 12 min @ T + 3 min @ Rec', '5 min @ E + 5 min @ Rec']
+CruiseIntervalRun5 = ['5 min @ Rec + 5 min @ E', '4 reps: 15 min @ T + 3 min @ Rec', '5 min @ E + 5 min @ Rec']
+
+FoundationRun1 = ['5 min @ Rec + 10 min @ E + 5 min @ Rec']
+FoundationRun2 = ['5 min @ Rec + 15 min @ E + 5 min @ Rec']
+FoundationRun3 = ['5 min @ Rec + 20 min @ E + 5 min @ Rec']
+FoundationRun4 = ['5 min @ Rec + 25 min @ E + 5 min @ Rec']
+FoundationRun5 = ['5 min @ Rec + 30 min @ E + 5 min @ Rec']
+FoundationRun6 = ['5 min @ Rec + 35 min @ E + 5 min @ Rec']
+FoundationRun7 = ['5 min @ Rec + 40 min @ E + 5 min @ Rec']
+FoundationRun8 = ['5 min @ Rec + 45 min @ E + 5 min @ Rec']
+FoundationRun9 = ['5 min @ Rec + 50 min @ E + 5 min @ Rec']
+
+ShortIntervalRun1 = ['5 min @ Rec + 5 min @ E', '6 reps: 1 min @ Rep + 2 min @ Rec', '5 min @ Rec']
+ShortIntervalRun2 = ['5 min @ Rec + 5 min @ E', '8 reps: 1 min @ Rep + 2 min @ Rec', '5 min @ Rec']
+ShortIntervalRun3 = ['5 min @ Rec + 5 min @ E', '6 reps: 1.5 min @ Rep + 2.5 min @ Rec', '5 min @ Rec']
+ShortIntervalRun4 = ['5 min @ Rec + 5 min @ E', '10 reps: 1 min @ Rep + 2 min @ Rec', '5 min @ Rec']
+ShortIntervalRun5 = ['5 min @ Rec + 5 min @ E', '8 reps: 1.5 min @ Rep + 2.5 min @ Rec', '5 min @ Rec']
+ShortIntervalRun6 = ['5 min @ Rec + 5 min @ E', '12 reps: 1 min @ Rep + 2 min @ Rec', '5 min @ Rec']
+ShortIntervalRun7 = ['5 min @ Rec + 5 min @ E', '10 reps: 1.5 min @ Rep + 2.5 min @ Rec', '5 min @ Rec']
+ShortIntervalRun8 = ['5 min @ Rec + 5 min @ E', '12 reps: 1.5 min @ Rep + 2.5 min @ Rec', '5 min @ Rec']
+
+RecoveryRun1 = ['20 min @ Rec']
+RecoveryRun2 = ['25 min @ Rec']
+RecoveryRun3 = ['30 min @ Rec']
+RecoveryRun4 = ['35 min @ Rec']
+RecoveryRun5 = ['40 min @ Rec']
+RecoveryRun6 = ['45 min @ Rec']
+RecoveryRun7 = ['50 min @ Rec']
+RecoveryRun8 = ['55 min @ Rec']
+RecoveryRun9 = ['60 min @ Rec']
+
+LongRunWithSpeedPlay1 = ['0.5 mile @ Rec + 1 mile @ E', '8 reps: 0.25 mile @ T + 0.75 mile @ E', '0.5 mile @ Rep']
+LongRunWithSpeedPlay2 = ['0.5 mile @ Rec + 1 mile @ E', '10 reps: 0.25 mile @ T + 0.75 mile @ E', '0.5 mile @ Rep']
+LongRunWithSpeedPlay3 = ['0.5 mile @ Rec + 1 mile @ E', '12 reps: 0.25 mile @ T + 0.75 mile @ E', '0.5 mile @ Rep']
+LongRunWithSpeedPlay4 = ['0.5 mile @ Rec + 1 mile @ E', '14 reps: 0.25 mile @ T + 0.75 mile @ E', '0.5 mile @ Rep']
+LongRunWithSpeedPlay5 = ['0.5 mile @ Rec + 1 mile @ E', '16 reps: 0.25 mile @ T + 0.75 mile @ E', '0.5 mile @ Rep']
+LongRunWithSpeedPlay6 = ['0.5 mile @ Rec + 1 mile @ E', '18 reps: 0.25 mile @ T + 0.75 mile @ E', '0.5 mile @ Rep']
 
 plan = TrainingPlan('halfMarathon')
 dict = WorkoutDict('woDict')
+dict8020 = WorkoutDict('8020dict')
 
 dict.addWorkout('workout 1', w1str, 'vdot50')
 dict.addWorkout('workout 2', w2str, 'vdot50')
 dict.addWorkout('workout 3', w3str, 'vdot50')
 dict.addWorkout('workout 4', w4str, 'vdot50')
-dict.listdict()
 
-plan.addWorkout(dict,'workout 1')
-plan.addWorkout(dict,'workout 3')
+dict8020.addWorkout('CruiseIntervalRun1', CruiseIntervalRun1, 'vdot50')
+dict8020.addWorkout('FoundationRun5', FoundationRun5, 'vdot50')
+dict8020.addWorkout('FoundationRun6', FoundationRun5, 'vdot50')
+dict8020.addWorkout('ShortIntervalRun4', ShortIntervalRun4, 'vdot50')
+dict8020.addWorkout('RecoveryRun5', RecoveryRun5, 'vdot50')
+dict8020.addWorkout('LongRunWithSpeedPlay1', LongRunWithSpeedPlay1, 'vdot50')
+
+# dict.listdict()
+dict8020.listdict()
+
+plan.addWorkout(dict8020, 'CruiseIntervalRun1')
+plan.addWorkout(dict8020, 'FoundationRun5')
+plan.addWorkout(dict8020, 'FoundationRun6')
+plan.addWorkout(dict8020, 'FoundationRun5')
+plan.addWorkout(dict8020, 'FoundationRun5')
+plan.addWorkout(dict8020, 'ShortIntervalRun4')
+plan.addWorkout(dict8020, 'RecoveryRun5')
+plan.addWorkout(dict8020, 'FoundationRun5')
+plan.addWorkout(dict8020, 'LongRunWithSpeedPlay1')
 
 plan.printTrainingPlan()
